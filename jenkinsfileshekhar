@@ -1,0 +1,17 @@
+node{
+    def mavenHome=tool name:"maven3.9.9"
+    stage('checkout'){
+        checkout scmGit(branches: [[name: '*/development']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Shekhar1221/maven-web-application.git']])
+    }
+    stage('build'){
+        sh "$mavenHome/bin/mvn clean package"
+    }
+    stage('uploadartifactsintonexus'){
+        sh "$mavenHome/bin/mvn deploy"
+    }
+    stage('DeploymantIntoTomcat'){
+        sshagent(['e86e7909-7fb1-499a-8b87-5620716723e7']) {
+        sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ubuntu@65.1.147.92:/opt/tomcat/webapps"
+     }
+    }
+}
